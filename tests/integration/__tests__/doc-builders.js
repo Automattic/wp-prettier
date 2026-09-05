@@ -30,6 +30,8 @@ describe("doc builders", () => {
         type: "group",
         id: undefined,
         contents: ["1"],
+        leadingLine: false,
+        trailingLine: false,
         break: false,
         expandedStates: undefined,
       },

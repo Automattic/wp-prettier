@@ -23,6 +23,7 @@ import { printOptionalToken } from "./miscellaneous.js";
 - `TSExternalModuleReference` (TypeScript)
 */
 function printCallExpression(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
   const { node } = path;
   const isNewExpression = node.type === "NewExpression";
 
@@ -60,7 +61,9 @@ function printCallExpression(path, options, print) {
         optional,
         typeArgumentsDoc,
         "(",
+        parenSpace,
         join(", ", printed),
+        parenSpace,
         ")",
       ];
     }

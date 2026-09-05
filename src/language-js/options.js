@@ -23,6 +23,7 @@ const options = {
   bracketSameLine: commonOptions.bracketSameLine,
   objectWrap: commonOptions.objectWrap,
   bracketSpacing: commonOptions.bracketSpacing,
+  parenSpacing: commonOptions.parenSpacing,
   jsxBracketSameLine: {
     category: CATEGORY_JAVASCRIPT,
     type: "boolean",

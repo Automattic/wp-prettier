@@ -37,6 +37,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 - `TupleTypeAnnotation`(Flow)
 */
 function printArray(path, options, print) {
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   /** @type{Doc[]} */
   const parts = [];
@@ -103,7 +104,7 @@ function printArray(path, options, print) {
         [
           "[",
           indent([
-            softline,
+            parenLine,
             shouldUseConciseFormatting
               ? printArrayElementsConcisely(path, options, print, trailingComma)
               : [
@@ -118,7 +119,7 @@ function printArray(path, options, print) {
                 ],
             printDanglingComments(path, options),
           ]),
-          softline,
+          parenLine,
           "]",
         ],
         { shouldBreak, id: groupId },

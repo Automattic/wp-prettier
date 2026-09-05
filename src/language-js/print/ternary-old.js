@@ -186,6 +186,8 @@ function shouldExtraIndentForConditionalExpression(path) {
  * @returns {Doc}
  */
 function printTernaryOld(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   const isConditionalExpression = node.type === "ConditionalExpression";
   const consequentNodePropertyName = isConditionalExpression
@@ -300,9 +302,9 @@ function printTernaryOld(path, options, print) {
     const part = [
       line,
       "? ",
-      consequentNode.type === node.type ? ifBreak("", "(") : "",
+      consequentNode.type === node.type ? ifBreak("", ["(", parenSpace]) : "",
       printBranch(consequentNodePropertyName),
-      consequentNode.type === node.type ? ifBreak("", ")") : "",
+      consequentNode.type === node.type ? ifBreak("", [parenSpace, ")"]) : "",
       line,
       ": ",
       printBranch(alternateNodePropertyName),
@@ -318,8 +320,8 @@ function printTernaryOld(path, options, print) {
     );
   }
 
-  const maybeGroup = (doc) =>
-    parent === firstNonConditionalParent ? group(doc) : doc;
+  const maybeGroup = (doc, groupOptions) =>
+    parent === firstNonConditionalParent ? group(doc, groupOptions) : doc;
 
   // Break the closing paren to keep the chain right after it:
   // (a
@@ -333,17 +335,23 @@ function printTernaryOld(path, options, print) {
     !parent.computed;
 
   const shouldExtraIndent = shouldExtraIndentForConditionalExpression(path);
+  const trailingLine =
+    isConditionalExpression && breakClosingParen && !shouldExtraIndent;
 
-  const result = maybeGroup([
-    printTernaryTest(path, options, print),
-    forceNoIndent ? parts : indent(parts),
-    isConditionalExpression && breakClosingParen && !shouldExtraIndent
-      ? softline
-      : "",
-  ]);
+  const result = maybeGroup(
+    [
+      printTernaryTest(path, options, print),
+      forceNoIndent ? parts : indent(parts),
+      trailingLine ? parenLine : "",
+    ],
+    { trailingLine },
+  );
 
   return isParentTest || shouldExtraIndent
-    ? group([indent([softline, result]), softline])
+    ? group([indent([parenLine, result]), parenLine], {
+        leadingLine: true,
+        trailingLine: true,
+      })
     : result;
 }
 

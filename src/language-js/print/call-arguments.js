@@ -4,6 +4,7 @@ import {
   conditionalGroup,
   group,
   hardline,
+  hasAddedLine,
   indent,
   line,
   softline,
@@ -49,6 +50,8 @@ import {
 - `TSExternalModuleReference` (TypeScript)
 */
 function printCallArguments(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
 
   const args = getCallArguments(node);
@@ -62,14 +65,14 @@ function printCallArguments(path, options, print) {
   // useEffect(() => { ... }, [foo, bar, baz])
   // useImperativeHandle(ref, () => { ... }, [foo, bar, baz])
   if (isReactHookCallWithDepsArray(args)) {
-    const parts = ["("];
+    const parts = ["(", parenSpace];
     iterateCallArgumentsPath(path, (path, index) => {
       parts.push(print());
       if (index !== lastArgIndex) {
         parts.push(", ");
       }
     });
-    parts.push(")");
+    parts.push(parenSpace, ")");
     return parts;
   }
 
@@ -136,15 +139,31 @@ function printCallArguments(path, options, print) {
       return [
         breakParent,
         conditionalGroup([
-          ["(", group(firstArg, { shouldBreak: true }), ", ", ...tailArgs, ")"],
+          [
+            "(",
+            parenSpace,
+            group(firstArg, { shouldBreak: true }),
+            ", ",
+            ...tailArgs,
+            parenSpace,
+            ")",
+          ],
           allArgsBrokenOut(),
         ]),
       ];
     }
 
     return conditionalGroup([
-      ["(", firstArg, ", ", ...tailArgs, ")"],
-      ["(", group(firstArg, { shouldBreak: true }), ", ", ...tailArgs, ")"],
+      ["(", parenSpace, firstArg, ", ", ...tailArgs, parenSpace, ")"],
+      [
+        "(",
+        parenSpace,
+        group(firstArg, { shouldBreak: true }),
+        ", ",
+        ...tailArgs,
+        parenSpace,
+        ")",
+      ],
       allArgsBrokenOut(),
     ]);
   }
@@ -155,10 +174,12 @@ function printCallArguments(path, options, print) {
       return allArgsBrokenOut();
     }
     let lastArg;
+    let lastArgAddedLine = false;
     try {
       lastArg = print(getCallArgumentSelector(node, -1), {
         expandLastArg: true,
       });
+      lastArgAddedLine = hasAddedLine(lastArg);
     } catch (caught) {
       if (caught instanceof ArgExpansionBailout) {
         return allArgsBrokenOut();
@@ -171,24 +192,45 @@ function printCallArguments(path, options, print) {
       return [
         breakParent,
         conditionalGroup([
-          ["(", ...headArgs, group(lastArg, { shouldBreak: true }), ")"],
+          [
+            "(",
+            parenSpace,
+            ...headArgs,
+            group(lastArg, { shouldBreak: true }),
+            lastArgAddedLine ? "" : parenSpace,
+            ")",
+          ],
           allArgsBrokenOut(),
         ]),
       ];
     }
 
     return conditionalGroup([
-      ["(", ...headArgs, lastArg, ")"],
-      ["(", ...headArgs, group(lastArg, { shouldBreak: true }), ")"],
+      [
+        "(",
+        parenSpace,
+        ...headArgs,
+        lastArg,
+        lastArgAddedLine ? "" : parenSpace,
+        ")",
+      ],
+      [
+        "(",
+        parenSpace,
+        ...headArgs,
+        group(lastArg, { shouldBreak: true }),
+        lastArgAddedLine ? "" : parenSpace,
+        ")",
+      ],
       allArgsBrokenOut(),
     ]);
   }
 
   const contents = [
     "(",
-    indent([softline, ...printedArguments]),
+    indent([parenLine, ...printedArguments]),
     trailingComma,
-    softline,
+    parenLine,
     ")",
   ];
   if (isLongCurriedCallExpression(path)) {

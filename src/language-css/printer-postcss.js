@@ -326,11 +326,13 @@ function genericPrint(path, options, print) {
     case "media-type":
       return adjustNumbers(adjustStrings(node.value, options));
 
-    case "media-feature-expression":
+    case "media-feature-expression": {
+      const parenSpace = options.parenSpacing ? " " : "";
       if (!node.nodes) {
         return node.value;
       }
-      return ["(", ...path.map(print, "nodes"), ")"];
+      return ["(", parenSpace, ...path.map(print, "nodes"), parenSpace, ")"];
+    }
 
     case "media-feature":
       return maybeToLowerCase(
@@ -461,18 +463,20 @@ function genericPrint(path, options, print) {
         node.value,
       ];
 
-    case "selector-pseudo":
+    case "selector-pseudo": {
+      const parenLine = options.parenSpacing ? line : softline;
       return [
         maybeToLowerCase(node.value),
         isNonEmptyArray(node.nodes)
           ? group([
               "(",
-              indent([softline, join([",", line], path.map(print, "nodes"))]),
-              softline,
+              indent([parenLine, join([",", line], path.map(print, "nodes"))]),
+              parenLine,
               ")",
             ])
           : "",
       ];
+    }
 
     case "selector-nesting":
       return node.value;

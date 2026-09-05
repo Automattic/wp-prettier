@@ -3,6 +3,7 @@ import {
   hardline,
   ifBreak,
   indent,
+  line,
   softline,
 } from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
@@ -156,15 +157,17 @@ function shouldInlineCondition(node) {
 }
 
 function printIfOrWhileConditionOrWithStatementObject(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   const property = node.type === "WithStatement" ? "object" : "test";
   const conditionDoc = print(property);
 
   if (shouldInlineCondition(node[property])) {
-    return conditionDoc;
+    return [parenSpace, conditionDoc, parenSpace];
   }
 
-  return group([indent([softline, conditionDoc]), softline]);
+  return group([indent([parenLine, conditionDoc]), parenLine]);
 }
 
 /**
@@ -172,18 +175,19 @@ function printIfOrWhileConditionOrWithStatementObject(path, options, print) {
 @returns {Doc}
 */
 function printDanglingCommentsInList(path, options, filter) {
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
 
   return hasComment(node, CommentCheckFlags.Dangling, filter)
     ? [
-        indent([softline, printDanglingComments(path, options, { filter })]),
+        indent([parenLine, printDanglingComments(path, options, { filter })]),
         hasComment(
           node,
           CommentCheckFlags.Dangling | CommentCheckFlags.Line,
           filter,
         )
           ? hardline
-          : softline,
+          : parenLine,
       ]
     : "";
 }

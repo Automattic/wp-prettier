@@ -69,6 +69,8 @@ function printFunctionParameters(
   shouldExpandParameters,
   shouldPrintTypeParameters,
 ) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const functionNode = path.node;
   const parameters = getFunctionParameters(functionNode);
   const typeParametersDoc =
@@ -130,7 +132,9 @@ function printFunctionParameters(
     return group([
       removeLines(typeParametersDoc),
       "(",
+      parenSpace,
       removeLines(printed),
+      parenSpace,
       ")",
     ]);
   }
@@ -146,12 +150,12 @@ function printFunctionParameters(
     (node) => !isNonEmptyArray(node.decorators),
   );
   if (shouldHugParameters && hasNotParameterDecorator) {
-    return [typeParametersDoc, "(", ...printed, ")"];
+    return [typeParametersDoc, "(", parenSpace, ...printed, parenSpace, ")"];
   }
 
   // don't break in specs, eg; `it("should maintain parens around done even when long", (done) => {})`
   if (isParametersInTestCall) {
-    return [typeParametersDoc, "(", ...printed, ")"];
+    return [typeParametersDoc, "(", parenSpace, ...printed, parenSpace, ")"];
   }
 
   const isFlowShorthandWithOneArg =
@@ -176,7 +180,7 @@ function printFunctionParameters(
       options.arrowParens === "always" ||
       functionNode.type === "HookTypeAnnotation"
     ) {
-      return ["(", ...printed, ")"];
+      return ["(", parenSpace, ...printed, parenSpace, ")"];
     }
     return printed;
   }
@@ -184,13 +188,13 @@ function printFunctionParameters(
   return [
     typeParametersDoc,
     "(",
-    indent([softline, ...printed]),
+    indent([parenLine, ...printed]),
     !hasRestParameter(functionNode) &&
     // Angular does not allow trailing comma
     path.root.type !== "NGRoot"
       ? printTrailingComma(options, "all")
       : "",
-    softline,
+    parenLine,
     ")",
   ];
 }

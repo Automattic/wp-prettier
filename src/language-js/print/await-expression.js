@@ -1,4 +1,4 @@
-import { group, indent, softline } from "../../document/index.js";
+import { group, indent, line, softline } from "../../document/index.js";
 import {
   isCallExpression,
   isMemberExpression,
@@ -11,6 +11,7 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
  */
 
 function printAwaitExpression(path, options, print) {
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   /** @type{Doc[]} */
   let parts = ["await"];
@@ -21,7 +22,7 @@ function printAwaitExpression(path, options, print) {
       (isCallExpression(parent) && parent.callee === node) ||
       (isMemberExpression(parent) && parent.object === node)
     ) {
-      parts = [indent([softline, ...parts]), softline];
+      parts = ["(", indent([parenLine, ...parts]), parenLine, ")"];
       // avoid printing `await (await` on one line
       const parentAwaitOrBlock = path.findAncestor(
         (node) =>

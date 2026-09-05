@@ -1,4 +1,4 @@
-import { indent, softline } from "../../document/index.js";
+import { indent, line, softline } from "../../document/index.js";
 import hasNewline from "../../utilities/has-newline.js";
 import { locEnd, locStart } from "../location/index.js";
 import { isBlockComment } from "../utilities/comment-types.js";
@@ -15,6 +15,8 @@ function printTryStatement(path, options, print) {
 }
 
 function printCatchClause(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   if (node.param) {
     const parameterHasComments = hasComment(
@@ -33,8 +35,8 @@ function printCatchClause(path, options, print) {
     return [
       "catch ",
       parameterHasComments
-        ? ["(", indent([softline, param]), softline, ") "]
-        : ["(", param, ") "],
+        ? ["(", indent([parenLine, param]), parenLine, ") "]
+        : ["(", parenSpace, param, parenSpace, ") "],
       print("body"),
     ];
   }

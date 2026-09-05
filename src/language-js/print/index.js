@@ -1,4 +1,10 @@
-import { group, indent, inheritLabel, softline } from "../../document/index.js";
+import {
+  group,
+  hasAddedLine,
+  indent,
+  inheritLabel,
+  softline,
+} from "../../document/index.js";
 import { printComments } from "../../main/comments/print.js";
 import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
 import needsParentheses from "../parentheses/needs-parentheses.js";
@@ -58,6 +64,7 @@ const shouldPrintDirectly = createTypeCheckFunction([
  * @returns {Doc}
  */
 function print(path, options, print, args) {
+  const parenSpace = options.parenSpacing ? " " : "";
   if (path.isRoot) {
     options.__onHtmlBindingRoot?.(path.node, options);
   }
@@ -89,11 +96,16 @@ function print(path, options, print, args) {
     return doc;
   }
 
-  return inheritLabel(doc, (doc) => [
-    needsParens ? "(" : "",
-    decoratorsDoc ? group([decoratorsDoc, doc]) : doc,
-    needsParens ? ")" : "",
-  ]);
+  return inheritLabel(doc, (doc) => {
+    const fullDoc = decoratorsDoc ? group([decoratorsDoc, doc]) : doc;
+    return [
+      needsParens ? "(" : "",
+      needsParens && !hasAddedLine(fullDoc, "start") ? parenSpace : "",
+      fullDoc,
+      needsParens && !hasAddedLine(fullDoc, "end") ? parenSpace : "",
+      needsParens ? ")" : "",
+    ];
+  });
 }
 
 function printCommentsForFunction(path, options, doc) {

@@ -447,6 +447,18 @@ Default: preserve",
 }
 `;
 
+exports[`show detailed usage with --help paren-spacing  1`] = `
+{
+  "stderr": "",
+  "stdout": "--paren-spacing
+
+  Print spaces between parens, WordPress style.
+
+Default: false",
+  "write": [],
+}
+`;
+
 exports[`show detailed usage with --help parser  1`] = `
 {
   "stderr": "",

@@ -199,11 +199,12 @@ function shouldUnquoteKey(path, options) {
 - `RecordDeclarationStaticProperty` (Flow)
 */
 function printKey(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
   const { node } = path;
   const property = getKeyProperty(node);
 
   if (isComputedKey(node)) {
-    return ["[", print(property), "]"];
+    return ["[", parenSpace, print(property), parenSpace, "]"];
   }
 
   if (shouldQuoteKey(path, options)) {

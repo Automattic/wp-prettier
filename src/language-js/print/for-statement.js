@@ -3,6 +3,7 @@ import { printDanglingComments } from "../../main/comments/print.js";
 import { printForXStatementBody } from "./clause.js";
 
 function printForStatement(path, options, print) {
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   const body = printForXStatementBody(path, options, print);
 
@@ -22,7 +23,7 @@ function printForStatement(path, options, print) {
       "for (",
       group([
         indent([
-          softline,
+          parenLine,
           print("init"),
           ";",
           line,
@@ -30,7 +31,7 @@ function printForStatement(path, options, print) {
           ";",
           node.update ? [line, print("update")] : "",
         ]),
-        softline,
+        parenLine,
       ]),
       ")",
       body,

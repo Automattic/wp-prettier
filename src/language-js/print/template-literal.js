@@ -6,6 +6,7 @@ import {
   indent,
   join,
   label,
+  line,
   lineSuffixBoundary,
   mapDoc,
   printDocToString,
@@ -204,6 +205,8 @@ function getTemplateLiteralExpressionIndent(path, options) {
 - `TSTemplateLiteralType` (TypeScript)
 */
 function printTemplateExpression(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node, index } = path;
   let expressionDoc = print();
 
@@ -246,7 +249,9 @@ function printTemplateExpression(path, options, print) {
       isBinaryCastExpression(node) ||
       isBinaryish(node))
   ) {
-    expressionDoc = [indent([softline, expressionDoc]), softline];
+    expressionDoc = [indent([parenLine, expressionDoc]), parenLine];
+  } else {
+    expressionDoc = [parenSpace, expressionDoc, parenSpace];
   }
 
   // For a template literal of the following form:

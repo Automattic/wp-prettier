@@ -6,11 +6,14 @@ import { printOptionalToken } from "./miscellaneous.js";
 - `OptionalIndexedAccessType`(flow)
 */
 function printIndexedAccessType(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
   return [
     print("objectType"),
     printOptionalToken(path),
     "[",
+    parenSpace,
     print("indexType"),
+    parenSpace,
     "]",
   ];
 }

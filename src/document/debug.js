@@ -158,6 +158,14 @@ function printDocToDebug(doc) {
     if (doc.type === DOC_TYPE_GROUP) {
       const optionsParts = [];
 
+      if (doc.leadingLine) {
+        optionsParts.push("leadingLine: true");
+      }
+
+      if (doc.trailingLine) {
+        optionsParts.push("trailingLine: true");
+      }
+
       if (doc.break && doc.break !== "propagated") {
         optionsParts.push("shouldBreak: true");
       }

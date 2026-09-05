@@ -1,9 +1,16 @@
-import { group, indent, join, softline } from "../../document/index.js";
+import {
+  group,
+  indent,
+  join,
+  line,
+  softline,
+} from "../../document/index.js";
 import { printClassMemberSemicolon } from "./class.js";
 import { printTrailingComma } from "./miscellaneous.js";
 import { printTypeAnnotationProperty } from "./type-annotation.js";
 
 function printIndexSignature(path, options, print) {
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   // The TypeScript parser accepts multiple parameters here. If you're
   // using them, it makes sense to have a trailing comma. But if you
@@ -13,9 +20,9 @@ function printIndexSignature(path, options, print) {
     node.parameters.length > 1 ? printTrailingComma(options) : "";
 
   const parametersGroup = group([
-    indent([softline, join([", ", softline], path.map(print, "parameters"))]),
+    indent([parenLine, join([", ", softline], path.map(print, "parameters"))]),
     trailingComma,
-    softline,
+    parenLine,
   ]);
 
   const isClassMember = path.key === "body" && path.parent.type === "ClassBody";

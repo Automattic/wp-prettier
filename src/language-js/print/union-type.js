@@ -8,7 +8,6 @@ import {
   softline,
 } from "../../document/index.js";
 import { printComments } from "../../main/comments/print.js";
-import needsParentheses from "../parentheses/needs-parentheses.js";
 import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { isFlowObjectTypePropertyAFunction } from "../utilities/is-flow-object-type-property-a-function.js";
 import {
@@ -26,8 +25,51 @@ import {
 @import {Doc} from "../../document/index.js";
 */
 
+// copy of the `TSUnionType` and `UnionTypeAnnotation` conditions from
+// `needsParentheses`, which defers to us so the parens can be spaced
+function needsParens(path) {
+  const { node, parent, key } = path;
+
+  if (node.type === "TSUnionType") {
+    if (
+      parent.type === "TSUnionType" ||
+      parent.type === "TSIntersectionType"
+    ) {
+      return true;
+    }
+
+    if (node.type === "TSInferType" && parent.type === "TSRestType") {
+      return false;
+    }
+
+    return (
+      parent.type === "TSArrayType" ||
+      parent.type === "TSOptionalType" ||
+      parent.type === "TSRestType" ||
+      (key === "objectType" && parent.type === "TSIndexedAccessType") ||
+      parent.type === "TSTypeOperator" ||
+      (parent.type === "TSTypeAnnotation" &&
+        path.grandparent.type.startsWith("TSJSDoc"))
+    );
+  }
+
+  if (node.type === "UnionTypeAnnotation") {
+    return (
+      parent.type === "ArrayTypeAnnotation" ||
+      parent.type === "NullableTypeAnnotation" ||
+      parent.type === "IntersectionTypeAnnotation" ||
+      parent.type === "UnionTypeAnnotation" ||
+      (key === "objectType" &&
+        (parent.type === "IndexedAccessType" ||
+          parent.type === "OptionalIndexedAccessType"))
+    );
+  }
+}
+
 // `TSUnionType` and `UnionTypeAnnotation`
 function printUnionType(path, options, print, args) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
 
   // {
@@ -35,7 +77,10 @@ function printUnionType(path, options, print, args) {
   // } | null | void
   // should be inlined and not be printed in the multi-line variant
   if (shouldHugUnionType(node)) {
-    return join(" | ", path.map(print, "types"));
+    const joined = join(" | ", path.map(print, "types"));
+    return needsParens(path)
+      ? ["(", parenSpace, joined, parenSpace, ")"]
+      : joined;
   }
 
   // single-line variation
@@ -67,15 +112,14 @@ function printUnionType(path, options, print, args) {
     printed = printComments(path, printed, options);
   }
 
-  if (needsParentheses(path, options)) {
-    return group([indent([softline, printed]), softline]);
+  if (needsParens(path)) {
+    return group(["(", indent([parenLine, printed]), parenLine, ")"]);
   }
 
   if (isMultipleTupleTypeElement(path)) {
     return group([
-      indent([ifBreak(["(", softline]), printed]),
-      softline,
-      ifBreak(")"),
+      indent([ifBreak(["(", parenLine]), printed]),
+      ifBreak([parenLine, ")"]),
     ]);
   }
 

@@ -25,7 +25,7 @@ if (
     TEST_RUNTIME === "nodejs")
 ) {
   PRETTIER_INSTALLED_DIR = installPrettier(PRETTIER_DIR);
-  PRETTIER_DIR = path.join(PRETTIER_INSTALLED_DIR, "node_modules/prettier");
+  PRETTIER_DIR = path.join(PRETTIER_INSTALLED_DIR, "node_modules/wp-prettier");
 }
 if (TEST_RUNTIME === "browser") {
   installBrowser();

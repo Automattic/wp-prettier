@@ -69,6 +69,7 @@ function printTypeScriptMappedTypeModifier(tokenNode, keyword) {
 }
 
 function printTypeScriptMappedType(path, options, print) {
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   // Break after `{` like `printObject`
   let shouldBreak = false;
@@ -113,13 +114,13 @@ function printTypeScriptMappedType(path, options, print) {
         group([
           "[",
           indent([
-            softline,
+            parenLine,
             print("key"),
             " in ",
             print("constraint"),
             node.nameType ? [" as ", print("nameType")] : "",
           ]),
-          softline,
+          parenLine,
           "]",
         ]),
         node.optional

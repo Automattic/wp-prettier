@@ -3,6 +3,7 @@ import {
   hardline,
   indent,
   join,
+  line,
   softline,
 } from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
@@ -11,11 +12,12 @@ import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 import { printStatementSequence } from "./statement-sequence.js";
 
 function printSwitchStatement(path, options, print) {
+  const parenLine = options.parenSpacing ? line : softline;
   return [
     group([
       "switch (",
-      indent([softline, print("discriminant")]),
-      softline,
+      indent([parenLine, print("discriminant")]),
+      parenLine,
       ")",
     ]),
     " {",

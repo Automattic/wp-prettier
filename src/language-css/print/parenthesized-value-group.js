@@ -59,6 +59,8 @@ function printTrailingComma(path, options) {
 }
 
 function printParenthesizedValueGroup(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node, parent } = path;
   const groupDocs = path.map(
     ({ node }) => (typeof node === "string" ? node : print()),
@@ -76,9 +78,9 @@ function printParenthesizedValueGroup(path, options, print) {
         node.groups[0].groups[0].value.startsWith("data:")))
   ) {
     return [
-      node.open ? print("open") : "",
+      node.open ? [print("open"), parenSpace] : "",
       join(",", groupDocs),
-      node.close ? print("close") : "",
+      node.close ? [parenSpace, print("close")] : "",
     ];
   }
 
@@ -92,6 +94,13 @@ function printParenthesizedValueGroup(path, options, print) {
         ? [hardline, parts]
         : group([shouldPrecededBySoftline(path) ? softline : "", fill(parts)]),
     );
+  }
+
+  if (node.groups.length === 0) {
+    return group([
+      node.open ? path.call(print, "open") : "",
+      node.close ? path.call(print, "close") : "",
+    ]);
   }
 
   const parts = path.map(({ node: child, isLast, index }) => {
@@ -142,8 +151,8 @@ function printParenthesizedValueGroup(path, options, print) {
   const doc = group(
     [
       node.open ? print("open") : "",
-      indent([softline, join(line, parts)]),
-      softline,
+      indent([parenLine, join(line, parts)]),
+      parenLine,
       lineSuffixBoundary,
       node.close ? print("close") : "",
     ],

@@ -178,6 +178,10 @@ exports[`API getSupportInfo() 1`] = `
       "default": "preserve",
       "type": "choice",
     },
+    "parenSpacing": {
+      "default": false,
+      "type": "boolean",
+    },
     "parser": {
       "choices": [
         "flow",
@@ -977,6 +981,15 @@ exports[`CLI --support-info  1`] = `
       "name": "objectWrap",
       "pluginDefaults": {},
       "type": "choice"
+    },
+    {
+      "category": "Common",
+      "default": false,
+      "description": "Print spaces between parens, WordPress style.",
+      "name": "parenSpacing",
+      "pluginDefaults": {},
+      "since": "0.0.0",
+      "type": "boolean"
     },
     {
       "category": "Global",

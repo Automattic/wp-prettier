@@ -1,6 +1,6 @@
 {
-  "name": "prettier",
-  "version": "3.9.6",
+  "name": "wp-prettier",
+  "version": "3.9.6-beta.1",
   "description": "Prettier is an opinionated code formatter",
   "bin": "./bin/prettier.cjs",
   "repository": "prettier/prettier",

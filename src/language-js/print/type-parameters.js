@@ -58,6 +58,8 @@ function shouldForceTrailingComma(path, options, paramsKey) {
 - `TSTypeReference` (TypeScript)
 */
 function printTypeParameters(path, options, print, paramsKey) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   const parameters = node[paramsKey];
 
@@ -105,8 +107,10 @@ function printTypeParameters(path, options, print, paramsKey) {
   if (shouldInline) {
     return [
       "<",
+      parenSpace,
       join(", ", path.map(print, paramsKey)),
       printDanglingCommentsForInline(path, options),
+      parenSpace,
       ">",
     ];
   }
@@ -120,9 +124,9 @@ function printTypeParameters(path, options, print, paramsKey) {
 
   return group([
     "<",
-    indent([softline, join([",", line], path.map(print, paramsKey))]),
+    indent([parenLine, join([",", line], path.map(print, paramsKey))]),
     trailingComma,
-    softline,
+    parenLine,
     ">",
   ]);
 }

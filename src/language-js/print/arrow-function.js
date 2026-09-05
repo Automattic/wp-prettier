@@ -1,6 +1,7 @@
 import { ArgExpansionBailout } from "../../common/errors.js";
 import {
   group,
+  hasAddedLine,
   ifBreak,
   indent,
   indentIfBreak,
@@ -150,21 +151,26 @@ function printArrowFunction(path, options, print, args = {}) {
     shouldPutBodyOnSameLine,
   });
 
-  return group([
-    group(
-      shouldIndentSignatures
-        ? indent([shouldPrintSoftlineInIndent ? softline : "", signaturesDoc])
-        : signaturesDoc,
-      { shouldBreak: shouldBreakSignatures, id: chainGroupId },
-    ),
-    " =>",
-    shouldPrintAsChain
-      ? indentIfBreak(bodyDoc, { groupId: chainGroupId })
-      : group(bodyDoc),
-    shouldPrintAsChain && isCallee
-      ? ifBreak(softline, "", { groupId: chainGroupId })
-      : "",
-  ]);
+  const trailingLine = hasAddedLine(bodyDoc);
+
+  return group(
+    [
+      group(
+        shouldIndentSignatures
+          ? indent([shouldPrintSoftlineInIndent ? softline : "", signaturesDoc])
+          : signaturesDoc,
+        { shouldBreak: shouldBreakSignatures, id: chainGroupId },
+      ),
+      " =>",
+      shouldPrintAsChain
+        ? indentIfBreak(bodyDoc, { groupId: chainGroupId })
+        : group(bodyDoc),
+      shouldPrintAsChain && isCallee
+        ? ifBreak(softline, "", { groupId: chainGroupId })
+        : "",
+    ],
+    { trailingLine },
+  );
 }
 
 function printArrowFunctionSignature(path, options, print, args) {
@@ -289,6 +295,8 @@ function printArrowFunctionBody(
   args,
   { bodyDoc, bodyComments, functionBody, shouldPutBodyOnSameLine },
 ) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node, parent } = path;
 
   const trailingComma = args.expandLastArg
@@ -302,26 +310,29 @@ function printArrowFunctionBody(
   const trailingSpace =
     (args.expandLastArg || parent.type === "JSXExpressionContainer") &&
     !hasComment(node)
-      ? softline
+      ? parenLine
       : "";
 
   if (shouldPutBodyOnSameLine && shouldAddParensIfNotBreak(functionBody)) {
     return [
       " ",
-      group([
-        ifBreak("", "("),
-        indent([softline, bodyDoc]),
-        ifBreak("", ")"),
-        trailingComma,
-        trailingSpace,
-      ]),
-      bodyComments,
+      group(
+        [
+          ifBreak("", ["(", parenSpace]),
+          indent([softline, bodyDoc]),
+          ifBreak("", [parenSpace, ")"]),
+          trailingComma,
+          trailingSpace,
+        ],
+        { trailingLine: trailingSpace !== "" },
+      ),
+      ...bodyComments,
     ];
   }
 
   return shouldPutBodyOnSameLine
-    ? [" ", bodyDoc, bodyComments]
-    : [indent([line, bodyDoc, bodyComments]), trailingComma, trailingSpace];
+    ? [" ", bodyDoc, ...bodyComments]
+    : [indent([line, bodyDoc, ...bodyComments]), trailingComma, trailingSpace];
 }
 
 export { printArrowFunction };

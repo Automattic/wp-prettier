@@ -4,6 +4,7 @@ import {
   fill,
   group,
   hardline,
+  hasAddedLine,
   ifBreak,
   indent,
   isEmptyDoc,
@@ -24,6 +25,7 @@ import needsParentheses from "../parentheses/needs-parentheses.js";
 import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { createTypeCheckFunction } from "../utilities/create-type-check-function.js";
 import { getRaw } from "../utilities/get-raw.js";
+import isIgnored from "../utilities/is-ignored.js";
 import { isMeaningfulJsxText } from "../utilities/is-meaningful-jsx-text.js";
 import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 import { jsxWhitespace } from "../utilities/jsx-whitespace.js";
@@ -116,7 +118,14 @@ function printJsxElementInternal(path, options, print) {
 
   const isMdxBlock = path.parent.rootMarker === "mdx";
 
-  const rawJsxWhitespace = options.singleQuote ? "{' '}" : '{" "}';
+  const rawJsxWhitespace = options.parenSpacing
+    ? options.singleQuote
+      ? "{ ' ' }"
+      : '{ " " }'
+    : options.singleQuote
+      ? "{' '}"
+      : '{" "}';
+
   const whitespace = isMdxBlock
     ? line
     : ifBreak([rawJsxWhitespace, softline], " ");
@@ -571,6 +580,8 @@ function printJsxAttribute(path, options, print) {
 }
 
 function printJsxExpressionContainer(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
 
   const shouldInline = (node, parent) =>
@@ -591,13 +602,27 @@ function printJsxExpressionContainer(path, options, print) {
           (node.type === "ConditionalExpression" || isBinaryish(node)))));
 
   if (shouldInline(node.expression, path.parent)) {
-    return group(["{", print("expression"), lineSuffixBoundary, "}"]);
+    const printed = print("expression");
+    // An ignored expression is emitted verbatim, and its source range already
+    // covers the spacing inside the braces; adding more would grow it each run.
+    const space = path.call(
+      () => (isIgnored(path) ? "" : parenSpace),
+      "expression",
+    );
+    return group([
+      "{",
+      space,
+      printed,
+      lineSuffixBoundary,
+      hasAddedLine(printed) ? "" : space,
+      "}",
+    ]);
   }
 
   return group([
     "{",
-    indent([softline, print("expression")]),
-    softline,
+    indent([parenLine, print("expression")]),
+    parenLine,
     lineSuffixBoundary,
     "}",
   ]);
@@ -778,6 +803,8 @@ function printJsxEmptyExpression(path, options /* , print*/) {
 
 // `JSXSpreadAttribute` and `JSXSpreadChild`
 function printJsxSpreadAttributeOrChild(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   return [
     "{",
@@ -785,11 +812,11 @@ function printJsxSpreadAttributeOrChild(path, options, print) {
       ({ node }) => {
         const printed = ["...", print()];
         if (!hasComment(node)) {
-          return printed;
+          return [parenSpace, printed, parenSpace];
         }
         return [
-          indent([softline, printComments(path, printed, options)]),
-          softline,
+          indent([parenLine, printComments(path, printed, options)]),
+          parenLine,
         ];
       },
       node.type === "JSXSpreadAttribute" ? "argument" : "expression",

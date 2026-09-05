@@ -17,6 +17,7 @@ import {
   DOC_TYPE_STRING,
   DOC_TYPE_TRIM,
   join,
+  line,
   literalline,
 } from "../builders/index.js";
 import getDocType from "./get-doc-type.js";
@@ -378,6 +379,31 @@ function canBreak(doc) {
   return findInDoc(doc, canBreakFn, false);
 }
 
+function findNonEmpty(doc, end) {
+  if (end) {
+    doc = Array.from(doc).reverse();
+  }
+  return doc.find((d) => d !== "");
+}
+
+function hasAddedLine(doc, where = "end", level = 0) {
+  let result = false;
+  if (Array.isArray(doc)) {
+    const first = findNonEmpty(doc, where === "end");
+    if (!first) {
+      result = false;
+    } else {
+      result = hasAddedLine(first, where, level + 1);
+    }
+  } else if (doc.type === "group") {
+    result = where === "end" ? doc.trailingLine : doc.leadingLine;
+  } else if (doc === line || doc === " ") {
+    result = true;
+  }
+
+  return result;
+}
+
 function inheritLabel(doc, fn) {
   return doc.type === DOC_TYPE_LABEL
     ? { ...doc, contents: fn(doc.contents) }
@@ -414,6 +440,7 @@ export {
   cleanDoc,
   findInDoc,
   getDocType,
+  hasAddedLine,
   inheritLabel,
   InvalidDocError,
   isEmptyDoc,

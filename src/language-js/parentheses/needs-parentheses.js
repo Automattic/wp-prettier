@@ -3,6 +3,7 @@ import { createTypeCheckFunction } from "../utilities/create-type-check-function
 import { getFunctionParameters } from "../utilities/function-parameters.js";
 import { getPrecedence } from "../utilities/get-precedence.js";
 import { isBitwiseOperator } from "../utilities/is-bitwise-operator.js";
+import isIgnored from "../utilities/is-ignored.js";
 import { isNullishCoalescing } from "../utilities/is-nullish-coalescing.js";
 import { isObjectProperty } from "../utilities/is-object-property.js";
 import {
@@ -205,6 +206,15 @@ function needsParentheses(path, options) {
         case "CallExpression":
         case "NewExpression":
         case "OptionalCallExpression":
+          // Logical and Binary expressions already got their parens if parent is CallExpression
+          if (
+            key === "callee" &&
+            !isIgnored(path) &&
+            (node.type === "LogicalExpression" ||
+              node.type === "BinaryExpression")
+          ) {
+            return false;
+          }
           return key === "callee";
 
         case "ClassExpression":
@@ -221,6 +231,15 @@ function needsParentheses(path, options) {
         case "UpdateExpression":
           return true;
         case "UnaryExpression":
+          // Logical and Binary expressions already got their parens if parent is UnaryExpression
+          if (
+            !isIgnored(path) &&
+            !hasComment(node) &&
+            (node.type === "LogicalExpression" ||
+              node.type === "BinaryExpression")
+          ) {
+            return false;
+          }
           // `UnaryExpression` adds parentheses and indention when argument has comment
           if (!hasComment(node)) {
             return true;
@@ -229,6 +248,15 @@ function needsParentheses(path, options) {
 
         case "MemberExpression":
         case "OptionalMemberExpression":
+          // Logical and Binary expressions already got their parens if parent is MemberExpression
+          if (
+            !isIgnored(path) &&
+            !parent.computed &&
+            (node.type === "LogicalExpression" ||
+              node.type === "BinaryExpression")
+          ) {
+            return false;
+          }
           return key === "object";
 
         case "AssignmentExpression":
@@ -329,11 +357,23 @@ function needsParentheses(path, options) {
 
         case "MemberExpression":
         case "OptionalMemberExpression":
+          // Await expression already got its parens in its own print code.
+          if (node.type === "AwaitExpression" && !isIgnored(path)) {
+            return false;
+          }
           return key === "object";
 
         case "NewExpression":
         case "CallExpression":
         case "OptionalCallExpression":
+          // Await expression already got its parens in its own print code.
+          if (
+            node.type === "AwaitExpression" &&
+            isCallExpression(parent) &&
+            !isIgnored(path)
+          ) {
+            return false;
+          }
           return key === "callee";
 
         case "ConditionalExpression":
@@ -415,6 +455,10 @@ function needsParentheses(path, options) {
     // fallthrough
     case "TSUnionType":
     case "TSIntersectionType":
+      // TSUnionType already got its parens in `printUnionType`
+      if (node.type === "TSUnionType" && !isIgnored(path)) {
+        return false;
+      }
       if (isUnionType(parent) || isIntersectionType(parent)) {
         return true;
       }
@@ -475,6 +519,10 @@ function needsParentheses(path, options) {
 
     case "IntersectionTypeAnnotation":
     case "UnionTypeAnnotation":
+      // TSUnionType already got its parens in `printUnionType`
+      if (node.type === "UnionTypeAnnotation" && !isIgnored(path)) {
+        return false;
+      }
       return (
         parent.type === "TypeOperator" ||
         parent.type === "KeyofTypeAnnotation" ||
@@ -839,7 +887,12 @@ function needsParentheses(path, options) {
         (key === "arguments" && isCallExpression(parent)) ||
         (key === "right" && parent.type === "NGPipeExpression") ||
         (key === "property" && parent.type === "MemberExpression") ||
-        parent.type === "AssignmentExpression"
+        parent.type === "AssignmentExpression" ||
+        // Pipe expression already got the parens when breaking inside certain parents
+        (!isIgnored(path) &&
+          (parent.type === "UnaryExpression" ||
+            (isMemberExpression(parent) && !parent.computed) ||
+            (key === "callee" && isCallExpression(parent))))
       ) {
         return false;
       }

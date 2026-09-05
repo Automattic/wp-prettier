@@ -10,8 +10,10 @@ import { DOC_TYPE_GROUP } from "./types.js";
   readonly contents: Doc,
   readonly break: boolean,
   readonly expandedStates: readonly Doc[],
+  readonly leadingLine: boolean,
+  readonly trailingLine: boolean,
 }} Group
-@typedef {{id?: GroupId, shouldBreak?: boolean, expandedStates?: Doc[]}} GroupOptions
+@typedef {{id?: GroupId, shouldBreak?: boolean, expandedStates?: Doc[], leadingLine?: boolean, trailingLine?: boolean}} GroupOptions
 */
 
 /**
@@ -29,6 +31,8 @@ function group(contents, options = {}) {
     contents,
     break: Boolean(options.shouldBreak),
     expandedStates: options.expandedStates,
+    leadingLine: Boolean(options.leadingLine),
+    trailingLine: Boolean(options.trailingLine),
   };
 }
 

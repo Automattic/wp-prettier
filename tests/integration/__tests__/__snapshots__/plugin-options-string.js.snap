@@ -16,7 +16,7 @@ exports[`show external options with \`--help\` 1`] = `
 "===================================================================
 --- Without plugin
 +++ With plugin
-@@ -28,17 +28,19 @@
+@@ -28,8 +28,10 @@
                             Where to print operators when binary expressions wrap lines.
                             Defaults to end.
    --no-experimental-ternaries
@@ -27,10 +27,11 @@ exports[`show external options with \`--help\` 1`] = `
                             How to handle whitespaces in HTML.
                             Defaults to css.
    --jsx-single-quote       Use single quotes in JSX.
-                            Defaults to false.
-   --object-wrap <preserve|collapse>
+@@ -38,9 +40,9 @@
                             How to wrap object literals.
                             Defaults to preserve.
+   --paren-spacing          Print spaces between parens, WordPress style.
+                            Defaults to false.
 -  --parser <flow|babel|babel-flow|babel-ts|typescript|acorn|espree|meriyah|css|less|scss|json|json5|jsonc|json-stringify|graphql|markdown|mdx|vue|yaml|glimmer|html|angular|lwc|mjml>
 +  --parser <flow|babel|babel-flow|babel-ts|typescript|acorn|espree|meriyah|css|less|scss|json|json5|jsonc|json-stringify|graphql|markdown|mdx|vue|yaml|glimmer|html|angular|lwc|mjml|foo-parser>
                             Which parser to use.

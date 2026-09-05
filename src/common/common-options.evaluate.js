@@ -26,6 +26,13 @@ const options = {
       },
     ],
   },
+  parenSpacing: {
+    since: "0.0.0",
+    category: CATEGORY_COMMON,
+    type: "boolean",
+    default: false,
+    description: "Print spaces between parens, WordPress style.",
+  },
   singleQuote: {
     category: CATEGORY_COMMON,
     type: "boolean",

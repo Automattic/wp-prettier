@@ -61,7 +61,8 @@ function createPackageJsonBuilder({ process }) {
       ).output;
 
       assert.ok(typeof bin === "string");
-      packageJson.bin = `./${bin}`;
+      // The package is named `wp-prettier`, but the CLI command stays `prettier`.
+      packageJson.bin = { prettier: `./${bin}` };
     }
 
     if (process) {

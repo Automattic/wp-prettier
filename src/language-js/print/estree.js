@@ -2,6 +2,7 @@ import {
   group,
   hardline,
   indent,
+  line,
   replaceEndOfLine,
   softline,
 } from "../../document/index.js";
@@ -83,6 +84,8 @@ import { printWhileStatement } from "./while-statement.js";
  * @returns {Doc}
  */
 function printEstree(path, options, print, args) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
 
   if (isLiteral(node)) {
@@ -110,12 +113,12 @@ function printEstree(path, options, print, args) {
         (isObjectExpression(node.expression) ||
           isArrayExpression(node.expression));
       if (shouldHug) {
-        return ["(", print("expression"), ")"];
+        return ["(", parenSpace, print("expression"), parenSpace, ")"];
       }
       return group([
         "(",
-        indent([softline, print("expression")]),
-        softline,
+        indent([parenLine, print("expression")]),
+        parenLine,
         ")",
       ]);
     }
@@ -226,7 +229,16 @@ function printEstree(path, options, print, args) {
     case "UnaryExpression": {
       const parts = [node.operator];
 
-      if (/[a-z]$/.test(node.operator)) {
+      if (
+        /[a-z]$/.test(node.operator) ||
+        (options.parenSpacing &&
+          node.operator === "!" &&
+          !(
+            node.argument &&
+            node.argument.type === "UnaryExpression" &&
+            node.argument.operator === "!"
+          ))
+      ) {
         parts.push(" ");
       }
 
@@ -234,7 +246,7 @@ function printEstree(path, options, print, args) {
 
       if (hasComment(node.argument)) {
         parts.push(
-          group(["(", indent([softline, argumentDoc]), softline, ")"]),
+          group(["(", indent([parenLine, argumentDoc]), parenLine, ")"]),
         );
       } else {
         parts.push(argumentDoc);

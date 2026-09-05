@@ -3,6 +3,7 @@ import {
   group,
   ifBreak,
   indent,
+  line,
   softline,
 } from "../../document/index.js";
 import {
@@ -14,6 +15,7 @@ import {
 - `TSTypeAssertion` (TypeScript)
 */
 function printTypeAssertion(path, options, print) {
+  const parenLine = options.parenSpacing ? line : softline;
   const { node } = path;
   const shouldBreakAfterCast = !(
     isArrayExpression(node.expression) || isObjectExpression(node.expression)
@@ -21,8 +23,8 @@ function printTypeAssertion(path, options, print) {
 
   const castGroup = group([
     "<",
-    indent([softline, print("typeAnnotation")]),
-    softline,
+    indent([parenLine, print("typeAnnotation")]),
+    parenLine,
     ">",
   ]);
 

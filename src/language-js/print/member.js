@@ -2,6 +2,7 @@ import {
   group,
   indent,
   label,
+  line,
   lineSuffixBoundary,
   softline,
 } from "../../document/index.js";
@@ -68,6 +69,8 @@ function printMemberExpression(path, options, print) {
 }
 
 function printMemberLookup(path, options, print) {
+  const parenSpace = options.parenSpacing ? " " : "";
+  const parenLine = options.parenSpacing ? line : softline;
   const property = print("property");
   const { node } = path;
   const optional = printOptionalToken(path);
@@ -77,10 +80,10 @@ function printMemberLookup(path, options, print) {
   }
 
   if (!node.property || isNumericLiteral(node.property)) {
-    return [optional, "[", property, "]"];
+    return [optional, "[", parenSpace, property, parenSpace, "]"];
   }
 
-  return group([optional, "[", indent([softline, property]), softline, "]"]);
+  return group([optional, "[", indent([parenLine, property]), parenLine, "]"]);
 }
 
 export { printMemberExpression, printMemberLookup };

@@ -1,0 +1,159 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`decorators.ts - {"parenSpacing":true} format 1`] = `
+====================================options=====================================
+parenSpacing: true
+parsers: ["typescript", "babel-ts"]
+                                                      printWidth: 80 (default) |
+=====================================input======================================
+// Decorators and auto accessors, which the paren spacing patch predates.
+class Widget {
+  @decorate(firstArgument, secondArgument) accessor label = "";
+  @decorate accessor [computedName] = 0;
+
+  @decorate({ option: true, other: false })
+  method(firstParameter: string, secondParameter: number): void {}
+}
+
+=====================================output=====================================
+// Decorators and auto accessors, which the paren spacing patch predates.
+class Widget {
+  @decorate( firstArgument, secondArgument ) accessor label = "";
+  @decorate accessor [ computedName ] = 0;
+
+  @decorate( { option: true, other: false } )
+  method( firstParameter: string, secondParameter: number ): void {}
+}
+
+================================================================================
+`;
+
+exports[`types.ts - {"parenSpacing":true} format 1`] = `
+====================================options=====================================
+parenSpacing: true
+parsers: ["typescript", "babel-ts"]
+                                                      printWidth: 80 (default) |
+=====================================input======================================
+// TypeScript syntax that did not exist yet when the paren spacing patch was written.
+
+// const type parameters, variance annotations, instantiation expressions
+function identity<const T extends readonly unknown[]>(value: T): T {
+  return value;
+}
+interface Box<in out T> {
+  unwrap(value: T): T;
+}
+const boundIdentity = identity<string>;
+
+// satisfies
+const config = { port: 1 } satisfies Record<string, number>;
+
+// import types, with import attributes
+type Thing = import("./m.js").Thing;
+type Resolved = import("./m.js", {
+  with: { "resolution-mode": "import" },
+}).Thing;
+
+// template literal types and key remapping
+type Prefixed = \`prefix-\${string}-suffix\`;
+type Getters<T> = {
+  [K in keyof T as \`get\${Capitalize<K & string>}\`]: () => T[K];
+};
+
+// infer with constraints inside tuple types
+type Head<T> = T extends [infer H extends string, ...infer R] ? H : never;
+
+// abstract accessors and override
+abstract class Base {
+  abstract accessor id: number;
+}
+class Derived extends Base {
+  accessor id = 0;
+  override toString(): string {
+    return String(this.id);
+  }
+}
+
+// enum bodies
+enum Direction {
+  Up = 1,
+  Down = 2,
+}
+
+=====================================output=====================================
+// TypeScript syntax that did not exist yet when the paren spacing patch was written.
+
+// const type parameters, variance annotations, instantiation expressions
+function identity< const T extends readonly unknown[] >( value: T ): T {
+  return value;
+}
+interface Box< in out T > {
+  unwrap( value: T ): T;
+}
+const boundIdentity = identity< string >;
+
+// satisfies
+const config = { port: 1 } satisfies Record< string, number >;
+
+// import types, with import attributes
+type Thing = import( "./m.js" ).Thing;
+type Resolved = import( "./m.js", {
+  with: { "resolution-mode": "import" },
+} ).Thing;
+
+// template literal types and key remapping
+type Prefixed = \`prefix-\${ string }-suffix\`;
+type Getters< T > = {
+  [ K in keyof T as \`get\${ Capitalize< K & string > }\` ]: () => T[ K ];
+};
+
+// infer with constraints inside tuple types
+type Head< T > = T extends [ infer H extends string, ...infer R ] ? H : never;
+
+// abstract accessors and override
+abstract class Base {
+  abstract accessor id: number;
+}
+class Derived extends Base {
+  accessor id = 0;
+  override toString(): string {
+    return String( this.id );
+  }
+}
+
+// enum bodies
+enum Direction {
+  Up = 1,
+  Down = 2,
+}
+
+================================================================================
+`;
+
+exports[`using.ts - {"parenSpacing":true} format 1`] = `
+====================================options=====================================
+parenSpacing: true
+parsers: ["typescript", "babel-ts"]
+                                                      printWidth: 80 (default) |
+=====================================input======================================
+// Explicit resource management, which the paren spacing patch predates.
+function withResource() {
+  using handle = openResource(firstArgument, secondArgument);
+}
+
+async function withAsyncResource() {
+  await using handle = openResource(firstArgument, secondArgument, thirdOne);
+}
+
+=====================================output=====================================
+// Explicit resource management, which the paren spacing patch predates.
+function withResource() {
+  using handle = openResource( firstArgument, secondArgument );
+}
+
+async function withAsyncResource() {
+  await using handle = openResource( firstArgument, secondArgument, thirdOne );
+}
+
+================================================================================
+`;
