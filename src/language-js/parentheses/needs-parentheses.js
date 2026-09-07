@@ -217,6 +217,10 @@ function needsParentheses(path, options) {
           }
           return key === "callee";
 
+        case "TSInstantiationExpression":
+          // Without parentheses the type arguments would bind to `Fn` instead of `fn`
+          return key === "expression";
+
         case "ClassExpression":
         case "ClassDeclaration":
           return key === "superClass";
